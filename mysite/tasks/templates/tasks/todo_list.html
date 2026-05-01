@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Todo list</title>
+</head>
+<body>
+    <!-- Форма добавления задачи -->
+    <form method="POST">
+        {% csrf_token %}
+        <input type="text" name="title" placeholder="Что нужно сделать?">
+        <button type="submit">Добавить задачу</button>
+    </form>
+
+    <h1>Мои задачи</h1>
+
+    <ul>
+        {% for task in tasks %}
+            <li style="margin-bottom: 10px;">
+                {% if task.status %}
+                    <del>{{ task.title }}</del> ✅
+                {% else %}
+                    {{ task.title }}
+                {% endif %}
+
+                <small style="color: gray;">
+                    (создано: {{ task.created_date|date:"H:i" }})
+                </small>
+
+                <!-- Форма удаления конкретной задачи -->
+                <form action="{% url 'delete_task' task.id %}" method="POST" style="display:inline; margin-left: 10px;">
+                    {% csrf_token %}
+                    <button type="submit" style="color: red; cursor: pointer;">
+                        Удалить
+                    </button>
+                </form>
+            </li>
+        {% empty %}
+            <li>Задач пока нет. Отдыхай!</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
