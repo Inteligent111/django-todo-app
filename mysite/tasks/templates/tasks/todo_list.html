@@ -16,27 +16,41 @@
 
     <ul>
         {% for task in tasks %}
-            <li style="margin-bottom: 10px;">
+
+            <li style="margin-bottom: 15px; list-style: none;">
+                <!-- Отображение текста в зависимости от статуса -->
                 {% if task.status %}
-                    <del>{{ task.title }}</del> ✅
+                    <del style="color: gray;">{{ task.title }}</del>
                 {% else %}
-                    {{ task.title }}
+                    <strong>{{ task.title }}</strong>
                 {% endif %}
 
-                <small style="color: gray;">
+                <small style="color: gray; margin-left: 10px;">
                     (создано: {{ task.created_date|date:"H:i" }})
                 </small>
 
-                <!-- Форма удаления конкретной задачи -->
-                <form action="{% url 'delete_task' task.id %}" method="POST" style="display:inline; margin-left: 10px;">
+                <!-- Кнопка смены статуса (Toggle) -->
+                <form action="{% url 'task_status' task.id %}" method="POST" style="display:inline; margin-left: 15px;">
                     {% csrf_token %}
-                    <button type="submit" style="color: red; cursor: pointer;">
+                    <button type="submit" style="background-color: #e0e0e0; border: 1px solid #ccc; cursor: pointer; padding: 2px 8px;">
+                        {% if task.status %} Вернуть {% else %} Готово {% endif %}
+                    </button>
+                </form>
+
+                <!-- Кнопка удаления -->
+                <form action="{% url 'delete_task' task.id %}" method="POST" style="display:inline; margin-left: 5px;">
+                    {% csrf_token %}
+                    <button type="submit" style="color: red; border: 1px solid red; background: none; cursor: pointer; padding: 2px 8px;">
                         Удалить
                     </button>
                 </form>
-            </li>
+                <a href="{% url 'edit_task' task.id %}" style="margin-left: 10px; text-decoration: none; color: blue;">
+    🖉 Редактировать
+        </a>
         {% empty %}
+            </li>
             <li>Задач пока нет. Отдыхай!</li>
+
         {% endfor %}
     </ul>
 </body>

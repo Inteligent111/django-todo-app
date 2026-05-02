@@ -16,7 +16,7 @@ def show_tasks(request):
             return redirect('tasks')
 
 
-    tasks = Task.objects.all()
+    tasks = Task.objects.order_by('status', '-created_date')
     return render(request, 'tasks/todo_list.html', {'tasks': tasks})
 
 
@@ -27,3 +27,21 @@ def delete_task(request, task_id):
 
     return redirect('tasks')
 
+def task_status(request, task_id):
+    if request.method == 'POST':
+        task = Task.objects.get(pk=task_id)
+        task.status = not task.status
+        task.save()
+    return redirect('tasks')
+
+def edit_task(request, task_id):
+    task = Task.objects.get(pk=task_id)
+
+    if request.method == 'POST':
+        new_title = request.POST.get('title')
+        task.title = new_title
+        task.save()
+        return redirect('tasks')
+
+
+    return render(request, 'tasks/edit_task.html', {'task': task})
