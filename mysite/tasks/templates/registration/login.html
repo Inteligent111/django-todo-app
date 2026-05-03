@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="ru"> <!-- Изменил на ru для корректного отображения кириллицы -->
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+</head>
+<body>
+    <h2>Войдите в учетную запись</h2>
+    <form method="POST">
+        {% csrf_token %} <!-- Добавили пробелы -->
+        {{ form.as_p }}
+        <button type="submit">Войти</button> <!-- Добавили текст кнопки -->
+    </form>
+    <p>Еще не зарегистрированы? <a href="{% url 'signup' %}">Создать аккаунт</a></p>
+</body>
+</html>
