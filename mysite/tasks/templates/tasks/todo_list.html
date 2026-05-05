@@ -5,11 +5,22 @@
     <title>Todo list</title>
 </head>
 <body>
+    <form method="POST" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit">Выйти</button>
+    </form>
     <!-- Форма добавления задачи -->
     <form method="POST">
         {% csrf_token %}
-        <input type="text" name="title" placeholder="Что нужно сделать?">
+        {{ form.title }}
         <button type="submit">Добавить задачу</button>
+        {% if form.title.errors %}
+        <div style="color: red; margin-top: 5px; font-size: 0.9em;">
+        {% for error in form.title.errors %}
+            <p style="margin: 0;">⚠ {{ error }}</p>
+        {% endfor %}
+        </div>
+        {% endif %}
     </form>
 
     <h1>Мои задачи</h1>

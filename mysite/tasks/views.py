@@ -1,53 +1,60 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.forms import UserCreationForm
 from tasks.models import Task
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from .forms import TaskForm
+
+
 
 # Create your views here.
 @login_required  # Теперь страница доступна только после входа
 def show_tasks(request):
-    if request.method == 'POST':
-        title_form = request.POST.get('title')
-        title_form = title_form.strip()
+    form = TaskForm(request.POST or None)
 
-        # Проверяем уникальность задачи ТОЛЬКО для текущего пользователя
-        if title_form and not Task.objects.filter(title=title_form, user=request.user).exists():
-            Task.objects.create(title=title_form, user=request.user) # Привязываем автора
-            return redirect('tasks')
-
-    # Забираем только задачи того, кто вошел на сайт
+    if request.method == "POST":
+        if form.is_valid():
+            task = form.save(commit=False)
+            task.user = request.user
+            task.save()
+            return redirect("tasks")
     tasks = Task.objects.filter(user=request.user).order_by('status', '-created_date')
-    return render(request, 'tasks/todo_list.html', {'tasks': tasks})
+    return render(request, 'tasks/todo_list.html', {'form': form, 'tasks': tasks})
 
 
+
+@login_required
+@require_POST
 def delete_task(request, task_id):
-    if request.method == 'POST':
-        task = Task.objects.get(pk=task_id)
-        task.delete()
+
+    task = get_object_or_404(Task, id=task_id, user=request.user)
+    task.delete()
 
     return redirect('tasks')
 
 
-
+@login_required
+@require_POST
 def task_status(request, task_id):
-    if request.method == 'POST':
-        task = Task.objects.get(pk=task_id)
+        task = get_object_or_404(Task, pk=task_id, user=request.user)
         task.status = not task.status
-        task.save()
-    return redirect('tasks')
-
-def edit_task(request, task_id):
-    task = Task.objects.get(pk=task_id)
-
-    if request.method == 'POST':
-        new_title = request.POST.get('title')
-        task.title = new_title
         task.save()
         return redirect('tasks')
 
 
-    return render(request, 'tasks/edit_task.html', {'task': task})
+@login_required
+def edit_task(request, task_id):
+    tasks = get_object_or_404(Task, pk=task_id, user=request.user)
+    form = TaskForm(request.POST or None, instance=tasks)
+    if request.method == "POST":
+        if form.is_valid():
+
+            form.save()
+
+            return redirect('tasks')
+
+    return render(request, 'tasks/edit_task.html', {'tasks': tasks, 'form': form})
 
 
 def signup(request):
@@ -56,10 +63,13 @@ def signup(request):
         if form.is_valid():
             user = form.save()
             login(request, user)  # Сразу логиним пользователя после регистрации
-            return redirect('todo_list')  # Имя твоего пути со списком задач
+            return redirect('tasks')  # Имя твоего пути со списком задач
     else:
         # Если это GET запрос, создаем пустую форму
         form = UserCreationForm()
 
     # Это выполняется, если форма невалидна ИЛИ если это GET запрос
     return render(request, 'registration/signup.html', {'form': form})
+
+
+
