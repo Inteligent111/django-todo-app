@@ -1,68 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Todo list</title>
-</head>
-<body>
-    <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit">Выйти</button>
-    </form>
-    <!-- Форма добавления задачи -->
-    <form method="POST">
-        {% csrf_token %}
-        {{ form.title }}
-        <button type="submit">Добавить задачу</button>
-        {% if form.title.errors %}
-        <div style="color: red; margin-top: 5px; font-size: 0.9em;">
-        {% for error in form.title.errors %}
-            <p style="margin: 0;">⚠ {{ error }}</p>
-        {% endfor %}
+{% extends 'base.html' %}
+
+{% block content %}
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>Мои задачи</h1>
+
+            <form method="POST" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-danger btn-sm">Выйти</button>
+            </form>
         </div>
-        {% endif %}
-    </form>
+        <div class="card mb-4 shadow-sm">
+    <div class="card-body">
+        <form method="POST" class="d-flex gap-2">
+            {% csrf_token %}
+            <div class="flex-grow-1">
+                {{ form.title }}
+            </div>
+            <button type="submit" class="btn btn-primary">Добавить</button>
+        </form>
+    </div>
+</div>
+        <!-- Список задач -->
+<div class="list-group shadow-sm">
+    {% for task in tasks %}
+        <!-- Каждая задача — это гибкая строка (d-flex) -->
+        <div class="list-group-item d-flex justify-content-between align-items-center py-3">
 
-    <h1>Мои задачи</h1>
-
-    <ul>
-        {% for task in tasks %}
-
-            <li style="margin-bottom: 15px; list-style: none;">
-                <!-- Отображение текста в зависимости от статуса -->
+            <!-- Левая часть: Текст и время -->
+            <div>
                 {% if task.status %}
-                    <del style="color: gray;">{{ task.title }}</del>
+                    <del class="text-muted">{{ task.title }}</del>
                 {% else %}
-                    <strong>{{ task.title }}</strong>
+                    <span class="fw-bold">{{ task.title }}</span>
                 {% endif %}
-
-                <small style="color: gray; margin-left: 10px;">
-                    (создано: {{ task.created_date|date:"H:i" }})
+                <small class="text-muted ms-2" style="font-size: 0.75rem;">
+                    {{ task.created_date|date:"H:i" }}
                 </small>
+            </div>
 
-                <!-- Кнопка смены статуса (Toggle) -->
-                <form action="{% url 'task_status' task.id %}" method="POST" style="display:inline; margin-left: 15px;">
+            <!-- Правая часть: Кнопки управления -->
+            <div class="d-flex gap-1">
+                <!-- Статус -->
+                <form action="{% url 'task_status' task.id %}" method="POST">
                     {% csrf_token %}
-                    <button type="submit" style="background-color: #e0e0e0; border: 1px solid #ccc; cursor: pointer; padding: 2px 8px;">
-                        {% if task.status %} Вернуть {% else %} Готово {% endif %}
+                    <button type="submit" class="btn btn-sm {% if task.status %}btn-secondary{% else %}btn-success{% endif %}">
+                        {% if task.status %}Вернуть{% else %}Готово{% endif %}
                     </button>
                 </form>
 
-                <!-- Кнопка удаления -->
-                <form action="{% url 'delete_task' task.id %}" method="POST" style="display:inline; margin-left: 5px;">
-                    {% csrf_token %}
-                    <button type="submit" style="color: red; border: 1px solid red; background: none; cursor: pointer; padding: 2px 8px;">
-                        Удалить
-                    </button>
-                </form>
-                <a href="{% url 'edit_task' task.id %}" style="margin-left: 10px; text-decoration: none; color: blue;">
-    🖉 Редактировать
-        </a>
-        {% empty %}
-            </li>
-            <li>Задач пока нет. Отдыхай!</li>
+                <!-- Редактировать -->
+                <a href="{% url 'edit_task' task.id %}" class="btn btn-sm btn-outline-primary">🖉</a>
 
-        {% endfor %}
-    </ul>
-</body>
-</html>
+                <!-- Удалить -->
+                <form action="{% url 'delete_task' task.id %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-sm btn-outline-danger">🗑</button>
+                </form>
+            </div>
+        </div>
+    {% empty %}
+        <div class="list-group-item text-center text-muted p-4">Задач пока нет. Отдыхай!</div>
+    {% endfor %}
+</div>
+
+
+    </div>
+</div>
+
+{% endblock %}

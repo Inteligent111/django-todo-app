@@ -1,16 +1,35 @@
-<!DOCTYPE html>
-<html lang="ru"> <!-- Изменил на ru для корректного отображения кириллицы -->
-<head>
-    <meta charset="UTF-8">
-    <title>Вход</title>
-</head>
-<body>
-    <h2>Войдите в учетную запись</h2>
-    <form method="POST">
-        {% csrf_token %} <!-- Добавили пробелы -->
-        {{ form.as_p }}
-        <button type="submit">Войти</button> <!-- Добавили текст кнопки -->
-    </form>
-    <p>Еще не зарегистрированы? <a href="{% url 'signup' %}">Создать аккаунт</a></p>
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center mt-4">
+    <div class="col-md-4">
+        <div class="card shadow border-0">
+            <div class="card-header bg-dark text-white text-center py-3">
+                <h4 class="mb-0">Вход в IT-Trainer</h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Логин</label>
+                        {{ form.username }}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <label class="form-label">Пароль</label>
+                        {{ form.password }}
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm">Войти в систему</button>
+                </form>
+
+                <div class="mt-4 text-center">
+                    <span class="text-muted">Новый пользователь?</span> 
+                    <a href="{% url 'signup' %}" class="text-decoration-none fw-bold">Создать аккаунт</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

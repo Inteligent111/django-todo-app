@@ -4,7 +4,7 @@ from tasks.models import Task
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
-from .forms import TaskForm
+from .forms import TaskForm, ExtendedUserCreationForm
 
 
 
@@ -59,14 +59,14 @@ def edit_task(request, task_id):
 
 def signup(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
+        form = ExtendedUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)  # Сразу логиним пользователя после регистрации
             return redirect('tasks')  # Имя твоего пути со списком задач
     else:
         # Если это GET запрос, создаем пустую форму
-        form = UserCreationForm()
+        form = ExtendedUserCreationForm()
 
     # Это выполняется, если форма невалидна ИЛИ если это GET запрос
     return render(request, 'registration/signup.html', {'form': form})
